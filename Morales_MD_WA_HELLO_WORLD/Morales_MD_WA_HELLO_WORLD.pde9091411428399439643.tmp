@@ -1,0 +1,541 @@
+
+// TIME VARS
+
+  int start_time;
+  int end_time;
+  int interval;
+  
+  
+Player player1;
+Enemy enemy1;
+Enemy enemy2;
+Enemy enemy3;
+
+
+Button button1;
+
+Health1 health_enemy;
+Health1 health_player;
+Animation naruto_jump_animation;
+Animation naruto_running_animation;
+
+Animation entry_animation;
+PImage[] entry_images = new PImage[3]; //THERE ARE 3 IMAGES IN THE ANIMATION.
+
+
+ArrayList<Bullet> bullet_list;
+ArrayList<Bullett> bullet_list1;
+
+PImage backgrund0;
+PImage backgrund1;
+PImage backgrund2;
+PImage[] naruto_jumping_images = new PImage[3];
+
+Animation play_animation;
+PImage[] play_images = new PImage[2]; //THERE ARE 3 IMAGES IN THE ANIMATION.
+
+Animation pain_walk_animation;
+PImage[] pain_walk_images = new PImage[7]; //THERE ARE 7 IMAGES IN THE ANIMATION.
+
+char switch_val;
+void setup(){
+  rectMode(CENTER);
+size(1343,705);
+
+start_time = millis();
+interval = 2000;
+
+//THIS CALLS THE IMAGE FOR BACKGROUND:
+backgrund0 = loadImage("background_0.jpg");
+backgrund1 = loadImage("background_1.jpg");
+backgrund2 = loadImage("background_2.jpg");
+
+
+//THIS CALLS THE IMAGES OF NARUTO JUMPING:
+////for (int i=0; i<naruto_jumping_images.length; i++) {
+
+//    naruto_jumping_images[i] = loadImage("Naruto_Jump_"+i+".jpg");
+    
+//  }
+  
+   // naruto_jump_animation = new Animation(naruto_jumping_images, 0.06, 5);
+   
+   
+   //THIS CALLS THE IMAGES OF ENTRY:
+for (int i=0; i<entry_images.length; i++) {
+
+    entry_images[i] = loadImage("entry_"+i+".jpg");
+    
+  }
+  
+    entry_animation = new Animation(entry_images, 0.05, 1);
+    
+    
+  //this animation is for the "play" button.  
+ for (int i=0; i<play_images.length; i++) {
+
+    play_images[i] = loadImage("Play_button_"+i+".png");
+    
+  }
+  
+    play_animation = new Animation(play_images, 0.09, 1);
+    
+    
+   //FOR PAIN WALKING ANIMATION: 
+ for (int i=0; i<pain_walk_images.length; i++) {
+
+    pain_walk_images[i] = loadImage("pain_walk_"+i+".png");
+    
+  }
+  
+    pain_walk_animation = new Animation(pain_walk_images, 0.09, 0.1);
+    
+    
+  
+    
+   
+
+player1 = new Player();
+enemy1 = new Enemy();
+enemy2 = new Enemy();
+enemy3 = new Enemy();
+button1 = new Button(width/2, 550, 505 ,261);
+
+health_enemy =  new Health1(300); //NUMBER INSIDE IS X POSITION ON HEALTH BARS.
+health_player = new Health1(1000); //THIS NUMBER INSIDE IS THE X POSITION OF THE HEALTH BARS
+bullet_list = new ArrayList<Bullet>();
+bullet_list1 = new ArrayList<Bullett>();
+
+switch_val = '0';
+
+
+//THIS ANIMATES THE ENTRY "LOADING" IMAGE.
+entry_animation.isAnimating = true;
+play_animation.isAnimating = false;
+pain_walk_animation.isAnimating = false;
+}
+
+
+
+
+
+
+
+void draw(){
+  println(switch_val);
+
+switch(switch_val){
+case '0':
+entry_animation.display(width/2,height/2);
+if (entry_animation.isAnimating == false){
+switch_val = '1';}
+
+
+
+  break;
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+case '1':
+  background(0); //CHANGE THIS 
+  //button1.render();
+  play_animation.display(button1.button_X, button1.button_Y);
+  button1.reset_boundaries();
+  if(button1.is_pressed() == true){
+    play_animation.isAnimating = true;
+    switch_val = '2';
+  }
+ 
+
+
+ 
+  
+  
+  break;
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+case '2' :
+background(backgrund0);
+
+//background(0,0,0);
+player1.render();
+player1.reset_boundaries();
+player1.move_left();
+player1.move_right();
+player1.jump();
+player1.reached_top_of_jump();
+player1.fall();
+player1.land();
+
+//naruto_jump_animation.display(player1.player_X, player1.player_Y);
+pain_walk_animation.display(enemy1.enemy_X, enemy1.enemy_Y);
+
+//enemy1.render();
+//enemy1.random_move();
+enemy1.move_left();
+enemy1.move_right();
+enemy1.fall();
+enemy1.reached_top_of_jump();
+enemy1.jump();
+enemy1.land();
+enemy1.reset_boundaries();
+
+
+//THIS "REMOVES" OR CHANGES HEALTH BAR EVERY TIME A BULLET TOUCHES THE PLAYER.
+if(player1.life == 3){
+health_player.draw_3_healths();
+
+}
+
+else if(player1.life == 2){
+health_player.draw_2_healths();
+
+}
+
+else if(player1.life == 1){
+health_player.draw_1_healths();
+
+}
+
+
+
+//THIS "REMOVES" OR CHANGES HEALTH BAR EVERY TIME A BULLET TOUCHES THE ENEMY.
+if(enemy1.life == 3){
+health_enemy.draw_3_healths();
+
+}
+
+else if(enemy1.life == 2){
+health_enemy.draw_2_healths();
+
+}
+
+else if(enemy1.life == 1){
+health_enemy.draw_1_healths();
+
+}
+
+
+
+  // for bullet functions
+  for (Bullet bullet1 : bullet_list) {
+    enemy1.is_hit(bullet1);
+    bullet1.render();
+    bullet1.move();
+    bullet1.reset_boundaries();
+  }
+  
+   //for enemy bullet functions
+  for (Bullett bullett1 : bullet_list1) {
+      player1.is_hit(bullett1);
+    
+    bullett1.render();
+    bullett1.move();
+    bullett1.reset_boundaries();
+  }
+  
+  
+  if(enemy1.is_dead == true){
+ switch_val = '3';
+ player1.life = 3;
+ 
+  }
+  
+  if(player1.is_dead == true){
+ switch_val = '1';}
+  
+   for (int i=bullet_list.size()-1; i>=0; i--) {
+    if (bullet_list.get(i).is_touched == true) {
+      bullet_list.remove(i);
+    }
+  }
+  
+   for (int i=bullet_list1.size()-1; i>=0; i--) {
+    if (bullet_list1.get(i).is_touched == true) {
+      bullet_list1.remove(i);
+    }
+  }
+  
+  
+  break;
+  
+ //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+ case '3':
+  background(backgrund1);
+
+//background(0,0,0);
+
+player1.render();
+player1.reset_boundaries();
+player1.move_left();
+player1.move_right();
+player1.jump();
+player1.reached_top_of_jump();
+player1.fall();
+player1.land();
+
+//naruto_jump_animation.display(player1.player_X, player1.player_Y);
+enemy2.render();
+enemy2.random_move();
+enemy2.reset_boundaries();
+
+
+//THIS "REMOVES" OR CHANGES HEALTH BAR EVERY TIME A BULLET TOUCHES THE PLAYER.
+if(player1.life == 3){
+health_player.draw_3_healths();
+
+}
+
+else if(player1.life == 2){
+health_player.draw_2_healths();
+
+}
+
+else if(player1.life == 1){
+health_player.draw_1_healths();
+
+}
+
+
+//THIS "REMOVES" OR CHANGES HEALTH BAR EVERY TIME A BULLET TOUCHES THE ENEMY.
+if(enemy2.life == 3){
+health_enemy.draw_3_healths();
+
+}
+
+else if(enemy2.life == 2){
+health_enemy.draw_2_healths();
+
+}
+
+else if(enemy2.life == 1){
+health_enemy.draw_1_healths();
+
+}
+
+
+
+  // for bullet functions
+  for (Bullet bullet1 : bullet_list) {
+        enemy2.is_hit(bullet1);
+        
+
+    bullet1.render();
+    bullet1.move();
+    bullet1.reset_boundaries();
+  }
+  
+   //for enemy bullet functions
+  for (Bullett bullett1 : bullet_list1) {
+      player1.is_hit(bullett1);
+    
+    bullett1.render();
+    bullett1.move();
+    bullett1.reset_boundaries();
+  }
+  
+  
+  if(enemy2.is_dead == true){
+ switch_val = '4';
+ player1.life = 3;
+ 
+  }
+  
+  if(player1.is_dead == true){
+ switch_val = '1';}
+  
+   for (int i=bullet_list.size()-1; i>=0; i--) {
+    if (bullet_list.get(i).is_touched == true) {
+      bullet_list.remove(i);
+    }
+  }
+  
+   for (int i=bullet_list1.size()-1; i>=0; i--) {
+    if (bullet_list1.get(i).is_touched == true) {
+      bullet_list1.remove(i);
+    }
+  }
+  
+  
+  break;
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+case '4' :
+background(backgrund2);
+
+//background(0,0,0);
+
+player1.render();
+player1.reset_boundaries();
+player1.move_left();
+player1.move_right();
+player1.jump();
+player1.reached_top_of_jump();
+player1.fall();
+player1.land();
+
+//naruto_jump_animation.display(player1.player_X, player1.player_Y);
+enemy3.render();
+enemy3.random_move();
+enemy3.reset_boundaries();
+
+
+//THIS "REMOVES" OR CHANGES HEALTH BAR EVERY TIME A BULLET TOUCHES THE PLAYER.
+if(player1.life == 3){
+health_player.draw_3_healths();
+
+}
+
+else if(player1.life == 2){
+health_player.draw_2_healths();
+
+}
+
+else if(player1.life == 1){
+health_player.draw_1_healths();
+
+}
+
+
+//THIS "REMOVES" OR CHANGES HEALTH BAR EVERY TIME A BULLET TOUCHES THE ENEMY.
+if(enemy3.life == 3){
+health_enemy.draw_3_healths();
+
+}
+
+else if(enemy3.life == 2){
+health_enemy.draw_2_healths();
+
+}
+
+else if(enemy3.life == 1){
+health_enemy.draw_1_healths();
+
+}
+
+
+
+  // for bullet functions
+  for (Bullet bullet1 : bullet_list) {
+    enemy3.is_hit(bullet1);
+    bullet1.render();
+    bullet1.move();
+    bullet1.reset_boundaries();
+  }
+  
+   //for enemy bullet functions
+  for (Bullett bullett1 : bullet_list1) {
+      player1.is_hit(bullett1);
+    
+    bullett1.render();
+    bullett1.move();
+    bullett1.reset_boundaries();
+  }
+  
+  
+  if(enemy3.is_dead == true){
+ switch_val = '5';
+ 
+  }
+  
+  if(player1.is_dead == true){
+ switch_val = '1';}
+  
+   for (int i=bullet_list.size()-1; i>=0; i--) {
+    if (bullet_list.get(i).is_touched == true) {
+      bullet_list.remove(i);
+    }
+  }
+  
+   for (int i=bullet_list1.size()-1; i>=0; i--) {
+    if (bullet_list1.get(i).is_touched == true) {
+      bullet_list1.remove(i);
+    }
+  }
+  
+  
+  break;
+
+
+case '5':
+background(backgrund2);
+break;
+
+
+
+
+
+}}
+
+
+void keyPressed(){
+if (key == CODED) {
+    if (keyCode == LEFT) {
+      player1.moving_left = true;
+      if(player1.player_X <= width/2){
+      player1.moving_left = false;}
+    }
+
+    if (keyCode == RIGHT) {
+      player1.moving_right = true;
+      if(player1.player_X >= width){
+      player1.moving_right = false;
+    }
+    }
+}
+
+if(key == 'd' || key == 'D'){
+pain_walk_animation.isAnimating = true;
+
+}
+
+ if (key == ' ') {
+
+    bullet_list.add(new Bullet(player1.player_X, player1.player_Y));}
+    
+    
+    
+    //ANY TIME W IS PRESSED, THE PLAYER JUMPS AND THE BOUNCING SOUND PLAYS.
+  if (key == 'w' && player1.is_jumping == false && player1.is_falling == false) {
+   
+   
+    
+    //BOOLEANS:
+    player1.is_jumping = true;
+
+    player1.moving_left = false;
+    player1.moving_right = false;
+    player1.is_falling = false;
+  }
+
+
+
+if(key == 'r'){
+switch_val = '0';
+}
+
+if(key == 't'){
+switch_val = '2';}
+
+
+if(key == 'u'){
+switch_val = '1';}
+
+
+
+
+
+}
+
+
+
+void keyReleased() {
+
+  if (key == CODED) {
+    if (keyCode == LEFT) {
+      player1.moving_left = false;
+    }
+
+    if (keyCode == RIGHT) {
+      player1.moving_right = false;
+    }
+  }
+}
